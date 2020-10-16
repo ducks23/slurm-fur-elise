@@ -4,7 +4,7 @@ import psycopg2
 
 def insert_node(conn, hostname, inventory, parition, state, default):
     '''Insert config of a node into relational db.'''
-    psql = """INSERT INTO  config (hostname, inventory, parition, state, default)
+    psql = """INSERT INTO  config (hostname, inventory, parition, state, default_partition)
               VALUES ( %s, %s, %s, %s, %s);"""
     node_id = None
     try:
@@ -27,7 +27,7 @@ def insert_node(conn, hostname, inventory, parition, state, default):
 
 def create_tables(conn):
     """ create tables in the PostgreSQL database"""
-    commands = """
+    command = """
         CREATE TABLE config (
             node_id SERIAL PRIMARY KEY,
             hostname VARCHAR(255),
@@ -36,12 +36,10 @@ def create_tables(conn):
             state VARCHAR(255),
             default_partition VARCHAR(255))
         """
-    
-        
     try:
         cur = conn.cursor()
-        # create table one by one
-        cur.execute(commands)
+        #create table
+        cur.execute(command)
         # close communication with the PostgreSQL database server
         cur.close()
         # commit the changes
@@ -60,7 +58,8 @@ def main():
         host = "127.0.0.1",
         port = "5432"
     )
-    create_tables(conn)
+    #table already created now time to insert data
+    #create_tables(conn)
     print("success :)")
 
 if __name__ == "__main__":
