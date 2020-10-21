@@ -6,7 +6,7 @@ import psycopg2
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-def select_config(conn):
+def get_config(conn):
     '''Insert config of a node into relational db.'''
     node_id = None
     try:
@@ -44,7 +44,6 @@ def insert_node(conn, hostname, inventory, partition, state, default):
     finally:
         if conn is not None:
             conn.close()
-
     return node_id
 
 def create_tables(conn):

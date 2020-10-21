@@ -66,7 +66,16 @@ class Slurmd(Object):
         pass
 
     def _on_relation_changed(self, event):
-        host = event.relation.data[event.unit].get("host", None)
+        if not event.relation.data.get(event.unit):
+            event.defer()
+            return
+        
+        host = event.relation.data[event.unit].get('hostname')
+        if not host:
+            event.defer()
+            return
+        slurmd = SlurmdInfo(host, "1696")
+        self.on.slurmd_available.emit(slurmd)
 
     def _on_relation_broken(self, event):
         pass
