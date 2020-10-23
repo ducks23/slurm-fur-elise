@@ -1,0 +1,4 @@
+get-config:
+  description: prints config
+assemble-send-config:
+  description: pulls config from mysql database and sends it to all slurm components

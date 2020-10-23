@@ -1,0 +1,20 @@
+name: slurm-orchestrator
+summary: helps configure slurm nodes
+
+maintainers:
+    - OmniVector Solutions <admin@omnivector.solutions>
+description: |
+        Handles config and sends to slurmctld slurmd and slurmdbd
+
+tags:
+    - slurm
+    - hpc
+ 
+series:
+    - focal
+    - bionic
+    - centos7
+
+requires:
+  db:
+    interface: mysql

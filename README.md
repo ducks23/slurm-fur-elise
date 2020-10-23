@@ -1,5 +1,5 @@
 # Slurm Charms
-This is the home of the slurm charms.
+Slurm and HPC systems can be a monster to deploy and maintain. At omnivector-solutions we want that process to be painless and harmonious. Our goal of slurm-fur-elise is to make all of the movin parts of your slurm-hpc flow perfectly like the orchestra of computer it is meant to be.
 
 ## Build
 To build all of the slurm charms, from the root of this project run, `make charms`.
