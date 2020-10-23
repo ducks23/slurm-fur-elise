@@ -42,11 +42,16 @@ class SlurmOperator(CharmBase):
 
         self._mysql = MySQLClient(self, "db")
         self._slurmd = Slurmd(self, "slurmd")
+        self._slurmdbd = Slurmdbd(self, "slurmdbd")
+        self._slurmctld = Slurmctld(self, "slurmctld")
 
         event_handler_bindings = {
             self.on.install: self._on_install,
             self.mysql.on.database_available: self._on_db_availabe,
             self._slurmd.on.slurmd_available: self._on_slurmd_available,
+            self._slurmdbd.on.slurmdbd_available: self._on_slurmdbd_available,
+            self._slurmctld.on.slurmctld_available: 
+            self._on_slurmctld_available,
             }
 
         for event, handler in event_handler_bindings.items():
@@ -71,21 +76,46 @@ class SlurmOperator(CharmBase):
             self._stored.port,
             self._stored.database
         )
-        db.create_table()
+        db.create_slurmd_table()
+        db.create_slurmdbd_table()
+        db.create_slurmctld_table()
 
     def _on_slurmd_available(self, event):
-        host = event.slurmd_info.host
-        db = Database(
+        slurmd_db = Database(
             self._stored.user,
             self._stored.password,
             self._stored.host,
             self._stored.port,
             self._stored.database
         )
-        db.insert_node(
+        slurmd_db.insert_node(
             event.slurmd_info.inventory,
             event.slurmd_info.partition,
             event.slurmd_info.state,
+        )
+
+    def _on_slurmdbd_available(self, event):
+        slurmdbd_db = Database(
+            self._stored.user,
+            self._stored.password,
+            self._stored.host,
+            self._stored.port,
+            self._stored.database
+        )
+        slurmdbd_db.insert_slurmdbd_node(
+            event.slurmdbd_info.host,
+        )
+
+    def _on_slurmctld_available(self, event):
+        slurmctld_db = Database(
+            self._stored.user,
+            self._stored.password,
+            self._stored.host,
+            self._stored.port,
+            self._stored.database
+        )
+        slurmcltd_db.insert_slurmctld_node(
+            event.slurmctld_info.host,
         )
 
 
