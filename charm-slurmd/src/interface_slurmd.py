@@ -10,6 +10,8 @@ from ops.framework import (
     Object,
     ObjectEvents,
 )
+from utils import get_inventory
+
 
 logger = logging.getLogger()
 
@@ -20,7 +22,7 @@ class SlurmConfigAvailableEvent(EventBase):
 class SlurmdProvidesEvents(ObjectEvents):
     """SlurmctldProvidesEvents."""
 
-    slurm_config_available = EventSource(SlurmConfigAvailableEvent)
+    config_available = EventSource(SlurmConfigAvailableEvent)
 
 
 class Slurmd(Object):
@@ -46,7 +48,14 @@ class Slurmd(Object):
 
     def _on_relation_created(self, event):
         """Set partition name to slurm-configurator."""
-        event.relation.data[self.model.app]['hostname'] = socket.gethostbyname()
+        node_name = self._charm.get_hostname()
+        partition = self.framework.model.config["partition-name"]
+        state = self.framework.model.config["state"]
+        node_addr = event.relation.data[self.model.unit]['ingress-address']
+        inventory = json.dumps(get_inventory(node_name, node_addr))
+        event.relation.data[self.model.unit]['inventory'] = inventory
+        event.relation.data[self.model.unit]['partition'] = partiton
+        event.relation.data[self.model.unit]['state'] = state
 
     def _on_relation_changed(self, event):
         """Check for the munge_key in the relation data."""

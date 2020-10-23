@@ -13,12 +13,120 @@ class Database:
         self._port = port
         self._database = database
 
-    def create_table(self):
+    def create_slurmctld_table(self):
         """ create tables in the PostgreSQL database"""
         command = """
-            CREATE TABLE config (
+            CREATE TABLE slurmctld (
                 node_id SERIAL PRIMARY KEY,
                 hostname VARCHAR(255),
+                port VARCHAR(255),
+                backup VARCHAR(255))
+            """
+        try:
+            conn = psycopg2.connect(
+                database = self.database,
+                user = self.user,
+                password = self.password,
+                host = self.host,
+                port = self.port
+            )
+            cur = conn.cursor()
+            #create table
+            cur.execute(command)
+            # close communication with the PostgreSQL database server
+            cur.close()
+            # commit the changes
+            conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+    
+    def insert__slurmctld_node(self,  host, backup):
+        '''Insert config of a node into relational db.'''
+        psql = """INSERT INTO  slurmctld (host, active)
+                  VALUES ( %s, %s);"""
+        node_id = None
+        try:
+            conn = psycopg2.connect(
+                database = self.database,
+                user = self.user,
+                password = self.password,
+                host = self.host,
+                port = self.port
+            )
+            cur = conn.cursor()
+            cur.execute(psql, (host, backup,))
+            node_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+        return node_id
+
+    def create_slurmdbd_table(self):
+        """ create tables in the PostgreSQL database"""
+        command = """
+            CREATE TABLE slurmdbd (
+                node_id SERIAL PRIMARY KEY,
+                hostname VARCHAR(255),
+                port VARCHAR(255),
+                backup VARCHAR(255))
+            """
+        try:
+            conn = psycopg2.connect(
+                database = self.database,
+                user = self.user,
+                password = self.password,
+                host = self.host,
+                port = self.port
+            )
+            cur = conn.cursor()
+            #create table
+            cur.execute(command)
+            # close communication with the PostgreSQL database server
+            cur.close()
+            # commit the changes
+            conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+
+    def insert__slurmdbd_node(self, host, backup):
+        '''Insert config of a node into relational db.'''
+        psql = """INSERT INTO  slurmdbd (host, active)
+                  VALUES ( %s, %s);"""
+        node_id = None
+        try:
+            conn = psycopg2.connect(
+                database = self.database,
+                user = self.user,
+                password = self.password,
+                host = self.host,
+                port = self.port
+            )
+            cur = conn.cursor()
+            cur.execute(psql, (host, backup,))
+            node_id = cur.fetchone()[0]
+            conn.commit()
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+        return node_id
+    
+    def create_slurmd_table(self):
+        """ create tables in the PostgreSQL database"""
+        command = """
+            CREATE TABLE slurmd (
                 inventory VARCHAR(255),
                 partition VARCHAR(255),
                 state VARCHAR(255),
@@ -45,9 +153,9 @@ class Database:
             if conn is not None:
                 conn.close()
 
-    def insert_node(self, hostname, inventory, partition, state, default):
+    def insert__slurmd_node(self,  inventory, partition, state, default):
         '''Insert config of a node into relational db.'''
-        psql = """INSERT INTO  config (hostname, inventory, partition, state, default_partition)
+        psql = """INSERT INTO  slurmd (inventory, partition, state, default_partition)
                   VALUES ( %s, %s, %s, %s, %s);"""
         node_id = None
         try:
@@ -69,3 +177,4 @@ class Database:
             if conn is not None:
                 conn.close()
         return node_id
+    

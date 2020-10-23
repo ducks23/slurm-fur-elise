@@ -83,11 +83,9 @@ class SlurmOperator(CharmBase):
             self._stored.database
         )
         db.insert_node(
-            event.slurmd_info.hostname,
             event.slurmd_info.inventory,
             event.slurmd_info.partition,
             event.slurmd_info.state,
-            event.slurmd_info.default,
         )
 
 
