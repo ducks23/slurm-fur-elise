@@ -118,6 +118,22 @@ class SlurmOperator(CharmBase):
             event.slurmctld_info.host,
         )
 
+    def _assebmle_send_config(self, event):
+        slurm_db = Database(
+            self._stored.user,
+            self._stored.password,
+            self._stored.host,
+            self._stored.port,
+            self._stored.database
+        )
+        config = slurm_db.get_config()
+        self._slurmctld.send(
+            config,
+        )
+        self._slurmd.send(
+            config,
+        )
+
 
 if __name__ == "__main__":
     main(SlurmOperator)

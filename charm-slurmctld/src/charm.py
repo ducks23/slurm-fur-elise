@@ -33,6 +33,7 @@ class SlurmctldCharm(CharmBase):
 
         event_handler_bindings = {
             self.on.install: self._on_install,
+            # need to figure out how I want to implement munge
             self._slurmctld.on.config_available:
             self._on_check_status_and_write_config,
         }
@@ -46,6 +47,21 @@ class SlurmctldCharm(CharmBase):
 
     def _on_upgrade(self, event):
         self._slurm_manager.upgrade()
+
+    def _on_munge_available(self, event):
+        self._slurm_manager.write_munge_key(
+            event.munge.munge
+        )
+        self._stored.munge_available = True
+
+    def _on_check_status_and_write_config(self, event):
+        if not self._stored.munge_available:
+            event.defer()
+            return
+        
+        self.slurm_manager.write_config_restart(
+            event.config_info.config
+        )
 
 
 if __name__ == "__main__":

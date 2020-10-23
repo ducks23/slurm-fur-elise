@@ -53,3 +53,16 @@ class Slurmctld(Object):
         """Obtain and store the munge_key, emit slurm_config_available."""
         host = socket.gethostbyname()
         event.relation.data[self.model.unit]['host'] = host
+    
+    def _on_relation_changed(self, event):
+        """Obtain and store the munge_key, emit slurm_config_available."""
+        event_app_data = event.relation.data.get(event.app)
+        if not event_app_data:
+            event.defer()
+            return
+
+        slurm_config = event_app_data.get('slurm_config')
+        if not slurm_config:
+            event.defer()
+            return
+        self.on.config_available.emit()
