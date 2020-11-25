@@ -48,13 +48,13 @@ class Slurmd(Object):
 
     def _on_relation_created(self, event):
         """Set partition name to slurm-configurator."""
-        node_name = self._charm.get_hostname()
-        partition = self.framework.model.config["partition-name"]
-        state = self.framework.model.config["state"]
+        partition = self.framework.model.config.get("partition-name")
+        state = self.framework.model.config.get("node-state")
         node_addr = event.relation.data[self.model.unit]['ingress-address']
-        inventory = json.dumps(get_inventory(node_name, node_addr))
+        inventory = json.dumps(get_inventory(socket.gethostname(), node_addr))
+        event.relation.data[self.model.unit]['host'] = socket.gethostname()
         event.relation.data[self.model.unit]['inventory'] = inventory
-        event.relation.data[self.model.unit]['partition'] = partiton
+        event.relation.data[self.model.unit]['partition'] = partition
         event.relation.data[self.model.unit]['state'] = state
 
     def _on_relation_changed(self, event):

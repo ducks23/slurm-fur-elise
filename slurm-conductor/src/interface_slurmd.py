@@ -17,9 +17,9 @@ logger = logging.getLogger()
 
 class SlurmdAvailableEvent(EventBase):
     """Emmited when slurmd is available."""
-    def __init__(self, handle, db_info):
+    def __init__(self, handle, slurmd_info):
         super().__init__(handle)
-        self._slurmd_info = db_info
+        self._slurmd_info = slurmd_info
 
     @property
     def slurmd_info(self):
@@ -29,7 +29,7 @@ class SlurmdAvailableEvent(EventBase):
         return self.slurmd_info.snapshot()
 
     def restore(self, snapshot):
-        self._slurmd_info = SlurmdInfo.restor(snapshot)
+        self._slurmd_info = SlurmdInfo.restore(snapshot)
 
 
 class SlurmdRequiresEvents(ObjectEvents):
@@ -75,8 +75,9 @@ class Slurmd(Object):
             event.defer()
             return
         partition = event.relation.data[event.unit].get('partition')
-        partition = event.relation.data[event.unit].get('state')
-        slurmd = SlurmdInfo(inventory, partition, state)
+        state = event.relation.data[event.unit].get('state')
+        host = event.relation.data[event.unit].get('host')
+        slurmd = SlurmdInfo(host, inventory, partition, state)
         self.on.slurmd_available.emit(slurmd)
 
     def _on_relation_broken(self, event):
@@ -84,13 +85,18 @@ class Slurmd(Object):
 
 class SlurmdInfo:
 
-    def __init__(self, inventory=None, partition=None, state=None):
-        self.set_address(partition, port, state)
+    def __init__(self, host=None, inventory=None, partition=None, state=None):
+        self.set_address(host, inventory, partition, state)
 
-    def set_address(self, inventory, partition, state):
+    def set_address(self, host, inventory, partition, state):
+        self._host = host
         self._inventory = inventory
         self._partition = partition
         self._state = state
+    
+    @property
+    def host(self):
+        return self._host
 
     @property
     def partition(self):
@@ -107,6 +113,7 @@ class SlurmdInfo:
     @classmethod
     def restore(cls, snapshot):
         return cls(
+            host=snapshot['slurmd_info.host'],
             inventory=snapshot['slurmd_info.inventory'],
             partition=snapshot['slurmd_info.partition'],
             state=snapshot['slurmd_info.state'],
@@ -114,6 +121,7 @@ class SlurmdInfo:
 
     def snapshot(self):
         return {
+            'slurmd_info.host': self.host,
             'slurmd_info.inventory': self.inventory,
             'slurmd_info.partition': self.partition,
             'slurmd_info.state': self.state,

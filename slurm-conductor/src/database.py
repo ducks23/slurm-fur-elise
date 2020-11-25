@@ -1,6 +1,17 @@
 #!/usr/bin/python
-import psycopg2
-
+import subprocess
+try:
+    import psycopg2
+except ImportError:
+    subprocess.call(["apt", "install", "python3-pip", "-y"])
+    subprocess.call(["apt-get", "install", "libpq-dev", "-y"])
+    subprocess.call(["apt-get", "install", "python-dev", "-y"])
+    subprocess.call(["pip3", "install", "psycopg2"])
+    subprocess.check_call([
+        'apt-get', '--assume-yes', '--option=Dpkg::Options::=--force-confold', 'install',
+        'python3-yaml', 'python3-psycopg2',
+    ])
+    import psycopg2
 
 class Database:
     def __init__(self, user, password, host, port, database):

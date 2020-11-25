@@ -1,4 +1,4 @@
-name: slurm-orchestrator
+name: slurm-conductor
 summary: helps configure slurm nodes
 
 maintainers:
@@ -18,3 +18,5 @@ series:
 requires:
   db:
     interface: mysql
+  slurmd:
+    interface: slurmd
