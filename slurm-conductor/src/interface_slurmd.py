@@ -70,13 +70,13 @@ class Slurmd(Object):
             event.defer()
             return
         
-        inventory = event.relation.data[event.unit].get('inventory')
-        if not inventory:
+        inventory = event.relation.data[event.unit].get('inventory', None)
+        partition = event.relation.data[event.unit].get('partition', None)
+        state = event.relation.data[event.unit].get('state', None)
+        host = event.relation.data[event.unit].get('host', None)
+        if not (inventory and partition and state and host):
             event.defer()
             return
-        partition = event.relation.data[event.unit].get('partition')
-        state = event.relation.data[event.unit].get('state')
-        host = event.relation.data[event.unit].get('host')
         slurmd = SlurmdInfo(host, inventory, partition, state)
         self.on.slurmd_available.emit(slurmd)
 
