@@ -58,19 +58,10 @@ class SlurmOperator(CharmBase):
         state = event.slurmd_info.state
 
         node = {
-            'node_name': node_name,
-            'node_addr': node_addr,
-            'state':state,
-            'real_memory': real_memory,
-            'cpus': cpus,
-            'threads_per_core': threads_per_core,
-            'cores_per_socket': cores_per_socket,
-            'sockets_per_board': sockets_per_board,
             'host': host,
             'inventory': inventory,
-            'state': state
         }
-        partition = { 
+        partition = {
             'nodes': [node],
             'default': default,
             'state': state
@@ -88,10 +79,11 @@ class SlurmOperator(CharmBase):
             self._stored.db.__setitem__(partition_name, partition)
         else:
             current_nodes = self._stored.db.__getitem__(partition_name)
-            new_nodes = current_nodes['nodes'].append(nodes)
+            new_nodes = current_nodes['nodes'].append(node)
             partition['nodes'] = new_nodes
             self._stored.db.__setitem__(partition_name, partition)
 
+        self._check_status()
 
 
 if __name__ == "__main__":

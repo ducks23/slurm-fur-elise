@@ -69,15 +69,45 @@ class Slurmd(Object):
         if not event.relation.data.get(event.unit):
             event.defer()
             return
+        rel_data = event.relation[event.unit]
+        host = rel_data.get('host', None)
+        partition = rel_data.get('partition', None)
+        state = rel_data.get('state', None)
+        node_name = rel_data.get('node-name', None)
+        node_addr = rel_data.get('node-addr', None)
+        real_memory = rel_data.get('real-memory', None)
+        cpus = rel_data.get('cpus', None)
+        threads_per_core = rel_data.get('threads-per-core', None)
+        threads_per_socket = rel_data.get('threads-per-socket', None)
+        sockets_per_board = rel_data.get('sockets-per-board', None)
         
-        inventory = event.relation.data[event.unit].get('inventory', None)
-        partition = event.relation.data[event.unit].get('partition', None)
-        state = event.relation.data[event.unit].get('state', None)
-        host = event.relation.data[event.unit].get('host', None)
-        if not (inventory and partition and state and host):
+        if not (
+                host and
+                partition and 
+                state and 
+                node_name and 
+                node_addr and
+                real_memory and
+                cpus and
+                threads_per_core and
+                threads_per_socket and
+                sockets_per_board
+            )
             event.defer()
             return
-        slurmd = SlurmdInfo(host, inventory, partition, state)
+
+        slurmd = SlurmdInfo(
+                host,
+                partition,
+                state,
+                node_name,
+                node_addr,
+                real_memory,
+                cpus,
+                threads_per_core,
+                threads_per_socket,
+                sockets_per_board
+            )
         self.on.slurmd_available.emit(slurmd)
 
     def _on_relation_broken(self, event):
@@ -85,10 +115,27 @@ class Slurmd(Object):
 
 class SlurmdInfo:
 
-    def __init__(self, host=None, inventory=None, partition=None, state=None):
-        self.set_address(host, inventory, partition, state)
+    def __init__(
+            self,
+            host=None,
+            inventory=None,
+            partition=None,
+            state=None
+        ):
+        self.set_address(
+            host,
+            inventory,
+            partition,
+            state
+        )
 
-    def set_address(self, host, inventory, partition, state):
+    def set_address(
+            self,
+            host,
+            inventory,
+            partition,
+            state
+        ):
         self._host = host
         self._inventory = inventory
         self._partition = partition
